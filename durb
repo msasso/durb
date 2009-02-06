@@ -10,7 +10,6 @@ require 'reducer'
 
 include HumanReadable
 
-SUFFIXES = [' ', 'k', 'm', 'g']
 DEFAULT_SIZE = "100m"
 
 opts = GetoptLong.new(
