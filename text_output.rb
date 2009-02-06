@@ -25,7 +25,7 @@ class TextOutput
 
   def print_tree(tree, size, indentation = 0)
     print_node(tree, size, indentation)
-    tree.subdirectories.each do |n|
+    tree.significant_subdirectories.each do |n|
       print_tree(n, size, indentation + 2)
     end
   end
@@ -50,7 +50,8 @@ class TextOutput
   end
 
   def calc_width(tree, indentation = 0)
-    (tree.subdirectories.map{|n| calc_width(n, indentation + 2)} + [tree.path_string.size + indentation]).max
+    (tree.significant_subdirectories.map{|n| calc_width(n, indentation + 2)} +
+          [tree.path_string.size + indentation]).max
   end
 
   def align(left, right)

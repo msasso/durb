@@ -1,20 +1,14 @@
 module Reducer
   def self.run(tree, threshold)
-    size, files = tree.size, tree.files
+    rtree = DirectoryNode.new(tree.path, tree.size, tree.files)
 
-    significant_subdirectories = []
-    tree.subdirectories.each do |node|
-      reduced_node = run(node, threshold)
-      if reduced_node.size >= threshold or not reduced_node.subdirectories.empty?
-        significant_subdirectories << reduced_node
-      else
-        size += reduced_node.size
-        files += reduced_node.files
-      end
+    tree.subdirectories.each{|n| rtree.add_subdirectory(run(n, threshold))}
+    rtree.insignificant_subdirectories.each do |n|
+      rtree.size += n.size
+      rtree.files += n.files
     end
+    rtree.significant = (rtree.size >= threshold or not rtree.significant_subdirectories.empty?)
 
-    new_tree = DirectoryNode.new(tree.path, size, files)
-    significant_subdirectories.each {|n| new_tree.add_subdirectory(n)}
-    return new_tree
+    return rtree
   end
 end
