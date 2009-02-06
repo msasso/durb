@@ -19,6 +19,19 @@ class DirectoryNode
     end
   end
 
+  def in?(d)
+    @path[0..d.path.length-1] == d.path
+  end
+
+  def find_subdirectory(d)
+    if d.path == @path
+      self
+    else
+      raise ArgumentError, "Cannot find path." if not d.in?(self)
+      d.path[@path.length]
+    end
+  end
+
   def significant_subdirectories
     @subdirectories.select{|n| n.significant}
   end
@@ -37,5 +50,21 @@ class DirectoryNode
 
   def self.string_to_path(path_string)
     path_string == '/' ? [] : path_string.split('/').reject{|component| component.empty?}
+  end
+
+  def dump(io = "", indentation = 0)
+    io << "%s(%s %d %d %d" % [' ' * indentation, self.path_string.inspect, @size, @files, @subdirectories.size]
+    io << "\n" + self.significant_subdirectories.map{|n| n.dump("", indentation+2)}.join("\n") \
+          if not self.significant_subdirectories.empty?
+    io << ")"
+    io << "\n" if indentation == 0
+    io
+  end
+
+  def self.read(io)
+    ddp = DirectoryDataParser.new
+#     x = ddp.parse(io)
+#     return x
+    return (ddp.parse(io) or raise ddp.failure_reason)
   end
 end

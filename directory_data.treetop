@@ -1,0 +1,63 @@
+grammar DirectoryData
+  rule data
+    ' '? nodes:node+ {
+      def read
+        nodes.elements.map{|e| e.instantiate}
+      end
+    }
+  end
+
+  rule node
+    optional_space '(' path ' ' size ' ' files subdirectories:subdirectory* ')' {
+      def instantiate
+        tree = DirectoryNode.new(path, size, files)
+        subdirectories.elements.each do |e|
+          n = e.elements[1]
+          tree.add_subdirectory(n.instantiate)
+        end
+        return tree
+      end
+
+      def path
+        super.escaped_string.text_value.gsub('\"', '"')
+      end
+
+      def size
+        super.text_value.to_i
+      end
+
+      def files
+        super.text_value.to_i
+      end
+    }
+  end
+
+  rule optional_space
+    ' '*
+  end
+
+  rule path
+    '"' escaped_string '"'
+  end
+
+  rule escaped_string
+    ('\"' / (!'"' .))*
+  end
+
+  rule size
+    integer
+  end
+
+  rule files
+    integer
+  end
+
+  rule integer
+    [0-9]+
+#     ([1-9] [0-9]*) / '0'
+  end
+
+  rule subdirectory
+    ' ' node
+  end
+end

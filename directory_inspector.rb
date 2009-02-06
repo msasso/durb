@@ -20,6 +20,14 @@ protected
     return dir
   end
 
+  def load_cache
+    ddp = DirectoryDataParser.new
+    @cache = ddp.parse(File.open("#{ENV['HOME']}/.durb_cache")).map{|n| n.instantiate} or
+          raise ddp.failure_reason
+  end
+
+#   tree.dump(File.open("#{ENV['HOME']}/.durb_cache", 'w'))
+
   def inspect(path)
     path_string = DirectoryNode.path_to_string(path)
     size = files = 0

@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
 require 'getoptlong'
+require 'treetop'
 
 require 'human_readable'
 require 'text_output'
@@ -8,6 +9,7 @@ require 'directory_node'
 require 'directory_inspector'
 require 'reducer'
 
+Treetop.load 'directory_data.treetop'
 include HumanReadable
 
 DEFAULT_SIZE = "100m"
@@ -35,5 +37,6 @@ $path = ARGV[0] ? File.expand_path(ARGV[0]) : File.expand_path(".")
 $size = DEFAULT_SIZE if not $size or $size == 0
 
 tree = DirectoryInspector.new($path, {:one_filesystem => $one_filesystem}).run
+tree.dump(File.open("#{ENV['HOME']}/.durb_cache", 'w'))
 reduced_tree = Reducer.run(tree, text_to_size($size))
 TextOutput.new(reduced_tree, $stdout, {:width => $width, :verbose => $verbose}).print_all(text_to_size($size))
