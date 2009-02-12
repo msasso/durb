@@ -34,7 +34,13 @@ if $options["--help"]
   exit
 end
 
-$path = $options.args.first ? File.expand_path($options.args.first) : File.expand_path(".")
+$options.args.each_index do |i|
+  while File.symlink?($options.args[i])
+    $options.args[i] = File.readlink($options.args[i])
+  end
+end
+$path = $options.args.empty? ? "." : $options.args.first
+$path = File.expand_path($path)
 
 tree = DirectoryInspector.new($path, $options).run
 reduced_tree = Reducer.run(tree, text_to_size($options["--size"]))
