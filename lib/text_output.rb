@@ -1,4 +1,6 @@
 class TextOutput
+  DEFAULT_WIDTH = 78
+
   def initialize(tree, output, options = {})
     @width = calc_width(tree) + (options["--verbose"] ? 23 : 11)
     @output = output
@@ -7,7 +9,8 @@ class TextOutput
         tput = open("|tput cols")
         max_width = tput.gets.to_i
       rescue
-        max_width = 78
+        max_width = ENV["COLUMNS"]
+        max_width = max_width ? max_width.to_i : DEFAULT_WIDTH
       end
       @width = [max_width, @width].min
     end
