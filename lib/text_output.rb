@@ -1,13 +1,13 @@
 class TextOutput
   def initialize(tree, output, options = {})
-    @width = calc_width(tree) + (options[:verbose] ? 23 : 11)
+    @width = calc_width(tree) + (options["--verbose"] ? 23 : 11)
     @output = output
     if output.tty?
       begin
         tput = open("|tput cols")
         max_width = tput.gets.to_i
       rescue
-        max_width = 80
+        max_width = 78
       end
       @width = [max_width, @width].min
     end
@@ -16,7 +16,7 @@ class TextOutput
   end
 
   def print_all(size)
-    if @options[:verbose]
+    if @options["--verbose"]
       heading = "SELF    SUBS/#   "
       puts((" " * (@width - heading.size - 2)) + heading)
     end
@@ -31,7 +31,7 @@ class TextOutput
   end
 
   def print_node(node, size, indentation)
-    if $verbose
+    if @options["--verbose"]
       subsize_text = size_to_text(node.subsize)
       if node.subsize == 0 and node.size == 0
         size_text = nil; raise "can this happen?"

@@ -1,39 +1,41 @@
 #!/usr/bin/env ruby
 
-require 'getoptlong'
+require 'commandline/optionparser'
 
+$:.unshift(File.dirname(__FILE__) + "/../lib")
 require 'human_readable'
 require 'text_output'
 require 'directory_node'
 require 'directory_inspector'
 require 'reducer'
 
+include CommandLine
 include HumanReadable
 
 DEFAULT_SIZE = "100m"
 
-opts = GetoptLong.new(
-  ["--size", "-s", GetoptLong::REQUIRED_ARGUMENT],
-  ["--width", "-w", GetoptLong::REQUIRED_ARGUMENT],
-  ["--verbose", "-v", GetoptLong::NO_ARGUMENT],
-  ["--one-filesystem", "-x", GetoptLong::NO_ARGUMENT])
+op = OptionParser.new
+op << Option.new(:flag, :names => %w(--verbose -v),
+      :opt_description => "Gives more information for each directory displayed.")
+op << Option.new(:arg_arity => [1, 1], :names => %w(--size -s),
+      :opt_found => OptionParser::GET_ARGS, :opt_not_found => DEFAULT_SIZE,
+      :opt_description => "Sets the significance threshold to the size specified.")
+# op << Option.new(:arg_arity => [1, 1], :names => %w(--width -w),
+#       :opt_description => "Sets the maximum line width.")
+op << Option.new(:flag, :names => %w(--one-filesystem -x),
+      :opt_description => "Don't descend directories on other filesystems.")
+op << Option.new(:flag, :names => %w(--help -h),
+      :opt_description => "Prints usage instructions.")
 
-opts.each do |opt, arg|
-  case opt
-  when "--size"
-    $size = arg
-  when "--width"
-    $width = arg.to_i
-  when "--verbose"
-    $verbose = true
-  when "--one-filesystem"
-    $one_filesystem = true
-  end
+$options = op.parse
+
+if $options["--help"]
+  puts op
+  exit
 end
 
-$path = ARGV[0] ? File.expand_path(ARGV[0]) : File.expand_path(".")
-$size = DEFAULT_SIZE if not $size or $size == 0
+$path = $options.args.first ? File.expand_path($options.args.first) : File.expand_path(".")
 
-tree = DirectoryInspector.new($path, {:one_filesystem => $one_filesystem}).run
-reduced_tree = Reducer.run(tree, text_to_size($size))
-TextOutput.new(reduced_tree, $stdout, {:width => $width, :verbose => $verbose}).print_all(text_to_size($size))
+tree = DirectoryInspector.new($path, $options).run
+reduced_tree = Reducer.run(tree, text_to_size($options["--size"]))
+TextOutput.new(reduced_tree, $stdout, $options).print_all(text_to_size($options["--size"]))

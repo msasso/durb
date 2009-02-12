@@ -1,7 +1,7 @@
 class DirectoryInspector
   def initialize(path, options = {})
     @path = DirectoryNode.string_to_path(path)
-    @filesystem = options[:one_filesystem] ? File.stat(path).dev : nil
+    @filesystem = options["--one-filesystem"] ? File.stat(path).dev : nil
   end
 
   def run
@@ -30,7 +30,7 @@ protected
     rescue Errno::EACCES
       raise $!
     rescue Errno::ENOENT
-      return nil
+      raise $!
     end
     dir.each do |f|
       next if [".", ".."].include?(f)
