@@ -1,0 +1,11 @@
+History.txt
+Manifest.txt
+README.txt
+Rakefile
+bin/durb
+lib/directory_inspector.rb
+lib/directory_node.rb
+lib/durb.rb
+lib/human_readable.rb
+lib/reducer.rb
+lib/text_output.rb
